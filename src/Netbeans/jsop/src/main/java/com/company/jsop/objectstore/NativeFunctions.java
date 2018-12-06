@@ -41,7 +41,7 @@ public class NativeFunctions {
     public static final NativeFunctionObjectSession.Delegate functionApply = new NativeFunctionObjectSession.Delegate() {
         @Override
         public void apply(ObjectStoreSession<ObjectSession> session, ApplicationContext applicationContext, ObjectSession self, ObjectSession[] arguments) {
-            FunctionObjectSession functionSelf = (FunctionObjectSession) self;
+            FunctionObjectSessionInterface functionSelf = (FunctionObjectSessionInterface) self;
             ObjectSession selfArgument = arguments[0];
             ArrayObjectSession argumentsArgument = (ArrayObjectSession) arguments[1];
             

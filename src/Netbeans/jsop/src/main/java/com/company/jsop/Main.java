@@ -60,6 +60,7 @@ import com.company.jsop.objectstore.ApplicationContext;
 import com.company.jsop.objectstore.CompiledCode;
 import com.company.jsop.objectstore.DefaultObjectSessionFactory;
 import com.company.jsop.objectstore.FunctionObjectSession;
+import com.company.jsop.objectstore.FunctionObjectSessionInterface;
 import com.company.jsop.objectstore.NativeFunctionObjectSession;
 import com.company.jsop.objectstore.NativeFunctions;
 import com.company.jsop.objectstore.ObjectSessionFactory;
@@ -264,7 +265,7 @@ public class Main {
 
             @Override
             public void apply(ApplicationContext applicationContext, Object applicable, Object self, Object[] arguments) {
-                ((FunctionObjectSession)applicable).apply(oss, applicationContext, (ObjectSession)self, (ObjectSession[])arguments);
+                ((FunctionObjectSessionInterface)applicable).apply(oss, applicationContext, (ObjectSession)self, (ObjectSession[])arguments);
             }
 
             @Override
