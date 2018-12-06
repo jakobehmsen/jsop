@@ -151,6 +151,16 @@ public class MapObjectSession implements ObjectSession, SessionStrategyContext<O
 
     @Override
     public void setInCache(String name, ObjectSession obj) {
+        if(this.identity != null) {
+            ObjectSession current = slots.get(name);
+
+            if(current != null) {
+                current.deleteAsValueForSlot(name, this.identity);
+            }
+
+            obj.setAsValueForSlot(name, this.identity);
+        }
+        
         slots.put(name, obj);
     }
 
