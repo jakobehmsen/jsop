@@ -17,4 +17,14 @@ public abstract class FunctionObjectSession extends MapObjectSession implements 
     public FunctionObjectSession(ObjectStoreSession<ObjectSession> session, ObjectStoreSessionIdentity identity) {
         super(session, identity);
     }
+
+    @Override
+    public ObjectSession newInstance(ObjectStoreSession<ObjectSession> session) {
+        NativeFunctionObjectSession objectCreate = session.getNativeFunction(NativeFunctions.objectCreate.getCode());
+        ObjectSession prototype = objectCreate.get("prototype");
+        
+        ObjectSession instance = NativeFunctions.objectCreateC.apply(session, prototype);
+        
+        return instance;
+    }
 }

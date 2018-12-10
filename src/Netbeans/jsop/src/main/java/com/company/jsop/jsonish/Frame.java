@@ -5,6 +5,8 @@
  */
 package com.company.jsop.jsonish;
 
+import com.company.jsop.objectstore.ApplicationContext;
+import com.company.jsop.objectstore.ObjectSession;
 import java.util.Arrays;
 import java.util.Stack;
 

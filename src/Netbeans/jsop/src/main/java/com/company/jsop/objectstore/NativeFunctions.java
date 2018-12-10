@@ -109,14 +109,20 @@ public class NativeFunctions {
         }
     };
     
-    public static final NativeFunctionObjectSession.Delegate objectCreate = new NativeFunctionObjectSession.Delegate() {
+    public static class objectCreateC implements NativeFunctionObjectSession.Delegate {
         @Override
         public void apply(ObjectStoreSession<ObjectSession> session, ApplicationContext applicationContext, ObjectSession self, ObjectSession[] arguments) {
-            ObjectSession newMap = session.getFactory().newMap(session);
-            
-            newMap.set("__proto__", arguments[0]);
+            ObjectSession newMap = apply(session, arguments[0]);
             
             applicationContext.returnFromNativeFunction(newMap);
+        }
+        
+        public static ObjectSession apply(ObjectStoreSession<ObjectSession> session, ObjectSession prototype) {
+            ObjectSession newMap = session.getFactory().newMap(session);
+            
+            newMap.set("__proto__", prototype);
+            
+            return newMap;
         }
 
         @Override
@@ -128,7 +134,9 @@ public class NativeFunctions {
         public String getName() {
             return "objectCreate";
         }
-    };
+    }
+    
+    public static final NativeFunctionObjectSession.Delegate objectCreate = new objectCreateC();
     
     public static final NativeFunctionObjectSession.Delegate javaPackage = new NativeFunctionObjectSession.Delegate() {
         @Override

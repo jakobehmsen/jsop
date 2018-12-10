@@ -43,7 +43,7 @@ public class JavaMethodSetObjectSession extends FunctionObjectSession {
             int bestD = Integer.MAX_VALUE;
             Method bestCandidate = null;
             for (Method m : methodsOfArity) {
-                int d = isCompatible(m, parameterTypes);
+                int d = isCompatible(m.getParameterTypes(), parameterTypes);
                 if (d != -1 && d < bestD) {
                     bestD = d;
                     bestCandidate = m;
@@ -72,11 +72,11 @@ public class JavaMethodSetObjectSession extends FunctionObjectSession {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    private int isCompatible(Method method, List<Class<?>> parameterTypes) {
+    public static int isCompatible(Class<?>[] methodParameterTypes, List<Class<?>> parameterTypes) {
         int distance = 0;
         
         for(int i = 0; i < parameterTypes.size(); i++) {
-            int d = isCompatible(method, parameterTypes, i);
+            int d = isCompatible(methodParameterTypes, parameterTypes, i);
             if(d == -1) {
                 return -1;
             }
@@ -86,9 +86,9 @@ public class JavaMethodSetObjectSession extends FunctionObjectSession {
         return distance;
     }
     
-    private int isCompatible(Method method, List<Class<?>> parameterTypes, int i) {
+    public static int isCompatible(Class<?>[] methodParameterTypes, List<Class<?>> parameterTypes, int i) {
         Class<?> argParameterType = parameterTypes.get(i);
-        Class<?> methodParameterType = method.getParameterTypes()[i];
+        Class<?> methodParameterType = methodParameterTypes[i];
         
         int distance = 0;
         

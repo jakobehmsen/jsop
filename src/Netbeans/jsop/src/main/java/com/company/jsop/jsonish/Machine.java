@@ -191,4 +191,9 @@ public class Machine implements ApplicationContext {
     public boolean isFalsy(Object obj) {
         return broker.isFalse(obj);
     }
+
+    public Object newInstance() {
+        Object constructor = getFrame().pop();
+        return broker.newInstance(constructor);
+    }
 }

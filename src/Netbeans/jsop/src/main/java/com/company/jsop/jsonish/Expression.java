@@ -395,7 +395,26 @@ public interface Expression {
                     return new Emitter() {
                         @Override
                         public void emit(List<Instruction> instructions) {
-                            instructions.add(Instruction.Set.pushGlobal);
+                            /*instructions.add(Instruction.Set.pushGlobal);
+                            instructions.add(Instruction.Set.pushNativeFunction("objectCreate"));
+                            constructorEmitter.emit(instructions);
+                            instructions.add(Instruction.Set.dup3);
+                            instructions.add(Instruction.Set.getPropertyValue("prototype"));
+                            instructions.add(Instruction.Set.apply(1));
+                            instructions.add(Instruction.Set.dup);
+                            instructions.add(Instruction.Set.swap2);*/
+                            
+                            
+                            constructorEmitter.emit(instructions);
+                            instructions.add(Instruction.Set.dup);
+                            instructions.add(Instruction.Set.newInstance);
+                            instructions.add(Instruction.Set.swap);
+                            
+                            argumentEmitters.forEach(x -> x.emit(instructions));
+                            instructions.add(Instruction.Set.apply(argumentExprs.size()));
+                            //instructions.add(Instruction.Set.pop);
+                            
+                            /*instructions.add(Instruction.Set.pushGlobal);
                             instructions.add(Instruction.Set.pushNativeFunction("objectCreate"));
                             constructorEmitter.emit(instructions);
                             instructions.add(Instruction.Set.dup3);
@@ -406,7 +425,11 @@ public interface Expression {
                             
                             argumentEmitters.forEach(x -> x.emit(instructions));
                             instructions.add(Instruction.Set.apply(argumentExprs.size()));
-                            instructions.add(Instruction.Set.pop);
+                            instructions.add(Instruction.Set.pop);*/
+                            
+                            if(!asExpression) {
+                                instructions.add(Instruction.Set.pop);
+                            }
                         }
                     };
                 }

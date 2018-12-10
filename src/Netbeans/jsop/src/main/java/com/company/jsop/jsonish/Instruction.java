@@ -108,6 +108,15 @@ public interface Instruction {
                 return "swap2";
             }
         };
+        
+        public static Instruction newInstance = new Instruction() {
+            @Override
+            public void evaluate(Machine machine) {
+                Object instance = machine.newInstance();
+                machine.getFrame().pushObject(instance);
+                machine.getFrame().incIP();
+            }
+        };
 
         public static Instruction apply(int arity) {
             return new Instruction() {

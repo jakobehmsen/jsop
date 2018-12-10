@@ -11,4 +11,6 @@ package com.company.jsop.objectstore;
  */
 public interface FunctionObjectSessionInterface {
     void apply(ObjectStoreSession<ObjectSession> session, ApplicationContext applicationContext, ObjectSession self, ObjectSession[] arguments);
+
+    public ObjectSession newInstance(ObjectStoreSession<ObjectSession> session);
 }

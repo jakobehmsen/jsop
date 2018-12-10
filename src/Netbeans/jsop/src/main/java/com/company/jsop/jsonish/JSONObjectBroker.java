@@ -69,4 +69,6 @@ public interface JSONObjectBroker {
     public Object eq(Object lhs, Object rhs);
 
     public Object seq(Object lhs, Object rhs);
+
+    public Object newInstance(Object constructor);
 }

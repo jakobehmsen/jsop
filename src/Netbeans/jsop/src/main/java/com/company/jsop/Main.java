@@ -277,6 +277,11 @@ public class Main {
             public Object getBoolean(boolean b) {
                 return oss.wrap(b);
             }
+
+            @Override
+            public Object newInstance(Object constructor) {
+                return ((FunctionObjectSessionInterface)constructor).newInstance(oss);
+            }
         };
     }
     
