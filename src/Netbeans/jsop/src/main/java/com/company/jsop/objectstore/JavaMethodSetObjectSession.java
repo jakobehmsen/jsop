@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -18,21 +19,42 @@ import java.util.stream.Collectors;
  * @author jakob
  */
 public class JavaMethodSetObjectSession extends FunctionObjectSession {
-    private Object instance;
-    private List<Method> methods;
+    private static class MethodConverter {
+        private Method method;
+        private Function<Object, ObjectSession> converter;
 
-    public JavaMethodSetObjectSession(Object instance, List<Method> methods) {
+        public MethodConverter(Method method, Function<Object, ObjectSession> converter) {
+            this.method = method;
+            this.converter = converter;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public Function<Object, ObjectSession> getConverter() {
+            return converter;
+        }
+    }
+    
+    private Object instance;
+    private List<MethodConverter> methods;
+
+    public JavaMethodSetObjectSession(ObjectStoreSession<ObjectSession> session, Object instance, List<Method> methods) {
         super(null);
         
         this.instance = instance;
-        this.methods = methods;
+        this.methods = methods
+                .stream()
+                .map(x -> new MethodConverter(x, JavaClassObjectSession.converter(session, x.getReturnType())))
+                .collect(Collectors.toList());
     }
 
     @Override
     public void apply(ObjectStoreSession<ObjectSession> session, ApplicationContext applicationContext, ObjectSession self, ObjectSession[] arguments) {
-        List<Method> methodsOfArity = methods
+        List<MethodConverter> methodsOfArity = methods
                 .stream()
-                .filter(x -> x.getParameterCount() == arguments.length)
+                .filter(x -> x.getMethod().getParameterCount() == arguments.length)
                 .collect(Collectors.toList());
         
         if(methodsOfArity.size() > 0) {
@@ -41,9 +63,9 @@ public class JavaMethodSetObjectSession extends FunctionObjectSession {
                     .map(x -> x.getJavaValueClass())
                     .collect(Collectors.toList());
             int bestD = Integer.MAX_VALUE;
-            Method bestCandidate = null;
-            for (Method m : methodsOfArity) {
-                int d = isCompatible(m.getParameterTypes(), parameterTypes);
+            MethodConverter bestCandidate = null;
+            for (MethodConverter m : methodsOfArity) {
+                int d = isCompatible(m.getMethod().getParameterTypes(), parameterTypes);
                 if (d != -1 && d < bestD) {
                     bestD = d;
                     bestCandidate = m;
@@ -55,10 +77,10 @@ public class JavaMethodSetObjectSession extends FunctionObjectSession {
                 for(int i = 0; i < arguments.length; i++) {
                     javaArgs[i] = arguments[i].getJavaValue();
                 }
-                Method m = bestCandidate;
+                MethodConverter m = bestCandidate;
                 try {
-                    Object obj = m.invoke(instance, javaArgs);
-                    JavaValueObjectSession res = new JavaValueObjectSession(obj);
+                    Object obj = m.getMethod().invoke(instance, javaArgs);
+                    ObjectSession res = m.getConverter().apply(obj);
                     applicationContext.returnFromNativeFunction(res);
                     
                     return;

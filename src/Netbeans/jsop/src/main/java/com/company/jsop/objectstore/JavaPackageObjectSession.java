@@ -10,9 +10,11 @@ package com.company.jsop.objectstore;
  * @author jakob
  */
 public class JavaPackageObjectSession extends JavaObjectSession {
+    private ObjectStoreSession<ObjectSession> session;
     private String name;
 
-    public JavaPackageObjectSession(String name) {
+    public JavaPackageObjectSession(ObjectStoreSession<ObjectSession> session, String name) {
+        this.session = session;
         this.name = name;
     }
 
@@ -26,9 +28,9 @@ public class JavaPackageObjectSession extends JavaObjectSession {
         String newName = name.length() > 0 ? name + "." + slot : slot;
         try {
             Class<?> c = Class.forName(newName);
-            return new JavaClassObjectSession(c);
+            return new JavaClassObjectSession(session, c);
         } catch (ClassNotFoundException ex) {
-            return new JavaPackageObjectSession(newName);
+            return new JavaPackageObjectSession(session, newName);
         }
     }
 

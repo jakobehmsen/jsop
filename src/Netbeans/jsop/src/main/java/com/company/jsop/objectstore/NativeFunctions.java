@@ -142,7 +142,7 @@ public class NativeFunctions {
         @Override
         public void apply(ObjectStoreSession<ObjectSession> session, ApplicationContext applicationContext, ObjectSession self, ObjectSession[] arguments) {
             String name = arguments[0].toString();
-            JavaPackageObjectSession javaPackageObjectSession = new JavaPackageObjectSession(name);
+            JavaPackageObjectSession javaPackageObjectSession = new JavaPackageObjectSession(session, name);
             applicationContext.returnFromNativeFunction(javaPackageObjectSession);
         }
 

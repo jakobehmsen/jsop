@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -20,10 +21,14 @@ import java.util.stream.Collectors;
  */
 public class JavaClassObjectSession extends JavaObjectSession implements FunctionObjectSessionInterface {
     // How to invoke constructor of class?
+    private ObjectStoreSession<ObjectSession> session;
     private Class<?> c;
+    private Function<Object, ObjectSession> converter;
 
-    public JavaClassObjectSession(Class<?> c) {
+    public JavaClassObjectSession(ObjectStoreSession<ObjectSession> session, Class<?> c) {
+        this.session = session;
         this.c = c;
+        converter = converter(session, c);
     }
 
     @Override
@@ -36,7 +41,7 @@ public class JavaClassObjectSession extends JavaObjectSession implements Functio
         try {
             Field f = c.getField(slot);
             Object v = f.get(null);
-            return new JavaValueObjectSession(v);
+            return new JavaValueObjectSession(session, v);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
             // Attempt to get method
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -71,6 +76,16 @@ public class JavaClassObjectSession extends JavaObjectSession implements Functio
     @Override
     public String toString() {
         return c.getName();
+    }
+    
+    public static Function<Object, ObjectSession> converter(ObjectStoreSession<ObjectSession> session, Class<?> c) {
+        if(c.equals(String.class)) {
+            return str -> 
+                    session.getFactory().newString((String)str);
+        }
+        
+        return obj -> 
+                new JavaValueObjectSession(session, obj);
     }
 
     @Override
@@ -110,7 +125,8 @@ public class JavaClassObjectSession extends JavaObjectSession implements Functio
                     // JavaClassObjectSession, that does this.
                     // E.g. StringJavaClassObjectSession, that convert to
                     // StringObjectSession.
-                    JavaValueObjectSession res = new JavaValueObjectSession(obj);
+                    ObjectSession res = converter.apply(obj);
+                    //JavaValueObjectSession res = new JavaValueObjectSession(obj);
                     applicationContext.returnFromNativeFunction(res);
                     
                 } catch (IllegalArgumentException | InvocationTargetException ex) {

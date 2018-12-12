@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
  * @author jakob
  */
 public class JavaValueObjectSession extends JavaObjectSession {
+    private ObjectStoreSession<ObjectSession> session;
     private Object v;
 
-    public JavaValueObjectSession(Object v) {
+    public JavaValueObjectSession(ObjectStoreSession<ObjectSession> session, Object v) {
+        this.session = session;
         this.v = v;
     }
 
@@ -44,14 +46,14 @@ public class JavaValueObjectSession extends JavaObjectSession {
         try {
             Field f = this.v.getClass().getField(slot);
             Object v = f.get(this.v);
-            return new JavaValueObjectSession(v);
+            return new JavaValueObjectSession(session, v);
         } catch (NoSuchFieldException | SecurityException ex) {
             List<Method> methods = Arrays.asList(this.v.getClass().getMethods())
                     .stream()
                     .filter(x -> x.getName().equals(slot))
                     .collect(Collectors.toList());
             if(methods.size() > 0) {
-                return new JavaMethodSetObjectSession(v, methods);
+                return new JavaMethodSetObjectSession(session, v, methods);
             }
             
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
