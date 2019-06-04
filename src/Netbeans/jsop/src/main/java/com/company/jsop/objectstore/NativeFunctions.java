@@ -157,6 +157,33 @@ public class NativeFunctions {
         }
     };
     
+    public static final NativeFunctionObjectSession.Delegate consoleLog = new NativeFunctionObjectSession.Delegate() {
+        @Override
+        public void apply(ObjectStoreSession<ObjectSession> session, ApplicationContext applicationContext, ObjectSession self, ObjectSession[] arguments) {
+            String msg = arguments[0].toString();
+            Console console = session.getConsole();
+            console.log(msg);
+            applicationContext.returnFromNativeFunction(session.getUndefined());
+        }
+
+        @Override
+        public int getCode() {
+            return 106;
+        }
+
+        @Override
+        public String getName() {
+            return "consoleLog";
+        }
+    };
+    
+    /*
+    A native function for committing the current session, and continuing the applied
+    argument - a function.
+    - What are the expected parameters for such a function?
+    commitCurrentSession(function(...) {})
+    */
+    
     public static List<NativeFunctionObjectSession.Delegate> getAll() {
         return Arrays.asList(NativeFunctions.class.getFields()).stream()
                 .filter(f -> NativeFunctionObjectSession.Delegate.class.isAssignableFrom(f.getType()))

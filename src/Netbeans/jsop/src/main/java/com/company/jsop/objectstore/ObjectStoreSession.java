@@ -34,4 +34,6 @@ public interface ObjectStoreSession<T> extends AutoCloseable {
     public ObjectSession toNumber(String str);
     
     SessionStrategy<T> getStrategy();
+
+    public Console getConsole();
 }

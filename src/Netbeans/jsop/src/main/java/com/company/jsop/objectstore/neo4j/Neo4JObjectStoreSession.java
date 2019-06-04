@@ -8,6 +8,7 @@ package com.company.jsop.objectstore.neo4j;
 import java.util.HashSet;
 import com.company.jsop.objectstore.AbstractObjectStoreSession;
 import com.company.jsop.objectstore.BooleanObjectSession;
+import com.company.jsop.objectstore.Console;
 import com.company.jsop.objectstore.NativeFunctionObjectSession;
 import com.company.jsop.objectstore.ObjectSession;
 import com.company.jsop.objectstore.ObjectSessionFactory;
@@ -29,8 +30,8 @@ public class Neo4JObjectStoreSession extends AbstractObjectStoreSession {
     private ObjectSession falseObj;
     private ObjectStoreSessionIdentity rootIdentity;
 
-    public Neo4JObjectStoreSession(Neo4JObjectStoreSessionIdentity.StatementGenerator rootIdentityStatementGenerator, ObjectStoreSessionIdentity arrayPrototypeIdentity, ObjectSessionFactory factory, com.company.jsop.objectstore.Compiler compiler, SessionStrategy sessionStrategy, Session session, Transaction transaction) {
-        super(arrayPrototypeIdentity, factory, compiler, sessionStrategy);
+    public Neo4JObjectStoreSession(Neo4JObjectStoreSessionIdentity.StatementGenerator rootIdentityStatementGenerator, ObjectStoreSessionIdentity arrayPrototypeIdentity, ObjectSessionFactory factory, com.company.jsop.objectstore.Compiler compiler, SessionStrategy sessionStrategy, Session session, Transaction transaction, Console console) {
+        super(arrayPrototypeIdentity, factory, compiler, sessionStrategy, console);
         
         this.session = session;
         this.transaction = transaction;

@@ -21,13 +21,15 @@ public abstract class AbstractObjectStoreSession<T extends ObjectSession> implem
     private ObjectSessionFactory<T> factory;
     private Compiler compiler;
     private SessionStrategy<T> sessionStrategy;
+    private Console console;
 
-    public AbstractObjectStoreSession(ObjectStoreSessionIdentity arrayPrototypeIdentity, ObjectSessionFactory<T> factory, Compiler compiler, SessionStrategy<T> sessionStrategy) {
+    public AbstractObjectStoreSession(ObjectStoreSessionIdentity arrayPrototypeIdentity, ObjectSessionFactory<T> factory, Compiler compiler, SessionStrategy<T> sessionStrategy, Console console) {
         this.arrayPrototypeIdentity = arrayPrototypeIdentity;
         this.factory = factory;
         this.compiler = compiler;
         this.sessionStrategy = sessionStrategy;
         objectCache = new Hashtable<>();
+        this.console = console;
     }
 
     @Override
@@ -74,5 +76,10 @@ public abstract class AbstractObjectStoreSession<T extends ObjectSession> implem
     @Override
     public CompiledCode compile(String src, String[] parameterNames) {
         return compiler.compile(this, src, parameterNames);
+    }
+
+    @Override
+    public Console getConsole() {
+        return console;
     }
 }

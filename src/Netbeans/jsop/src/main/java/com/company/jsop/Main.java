@@ -58,6 +58,7 @@ import com.company.jsop.jsonish.Script;
 import com.company.jsop.jsonish.ScriptTreeWalker;
 import com.company.jsop.objectstore.ApplicationContext;
 import com.company.jsop.objectstore.CompiledCode;
+import com.company.jsop.objectstore.Console;
 import com.company.jsop.objectstore.DefaultObjectSessionFactory;
 import com.company.jsop.objectstore.FunctionObjectSession;
 import com.company.jsop.objectstore.FunctionObjectSessionInterface;
@@ -65,6 +66,7 @@ import com.company.jsop.objectstore.NativeFunctionObjectSession;
 import com.company.jsop.objectstore.NativeFunctions;
 import com.company.jsop.objectstore.ObjectSessionFactory;
 import com.company.jsop.objectstore.Scope;
+import java.util.concurrent.CompletableFuture;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
@@ -293,6 +295,27 @@ public class Main {
         );
     }
     
+    private static class ConsoleListModel implements Console {
+        private DefaultListModel<String> outcomesListModel;
+        
+        public ConsoleListModel(DefaultListModel<String> outcomesListModel) {
+            this.outcomesListModel = outcomesListModel;
+        }
+        
+        public void start() {
+            outcomesListModel.clear();
+        }
+        
+        public void end() {
+            
+        }
+
+        @Override
+        public void log(String msg) {
+            outcomesListModel.addElement(msg);
+        }
+    }
+    
     public static void main(String[] args) throws Exception { 
         Configuration configuration = new Configuration();       
         String uri = configuration.getUri();
@@ -376,19 +399,32 @@ public class Main {
         // MERGE (:Object:Root)
         // MERGE (:Object:ArrayPrototype)
         // MERGE (:Object:NativeFunction {flags: [100..999]})
+        DefaultListModel<String> outcomesListModel = new DefaultListModel<>();
+        ConsoleListModel consoleListModel = new ConsoleListModel(outcomesListModel);
         
         Future<ObjectStoreDriver<ObjectSession>> driverFuture = executorService.submit(() -> {
             Config config = Config.build()
                 .withConnectionTimeout(10, TimeUnit.SECONDS)
                 .toConfig();
             
+            Console console = consoleListModel;
+            
             return new Neo4JObjectStoreDriver<>(
                 GraphDatabase.driver(uri, AuthTokens.basic(user, password), config), 
                 new Neo4JObjectStoreSessionIdentity.LabelsStatementGenerator(":Object:Root"),
                 new Neo4JObjectStoreSessionIdentity.LabelsStatementGenerator(":Object:ArrayPrototype"),
                 objectSessionFactory,
-                compiler);
+                compiler,
+                console);
         });
+        
+        // Generate script for Root, ArrayPrototype, Console and the like
+        /*
+        CREATE (n:Object:Root)
+        CREATE (n:Object:ArrayPrototype)
+        CREATE (n:Object:Console)
+        */
+        // Set up basic objects: Array, console, and the like
         
         String mergeAllNativeFunctions = NativeFunctions.getAll().stream()
                 .map(f -> "MERGE (:Object:NativeFunction {flags: " + f.getCode() + "})")
@@ -438,7 +474,6 @@ public class Main {
         
         JTextPane sourceCodeTextPane = new JTextPane();
         JScrollPane sourceCodeScrollPane = new JScrollPane(sourceCodeTextPane);
-        DefaultListModel<String> outcomesListModel = new DefaultListModel<>();
         JList<String> outcomesList = new JList(outcomesListModel);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sourceCodeScrollPane, outcomesList);
         splitPane.setResizeWeight(0.5);
@@ -473,14 +508,17 @@ public class Main {
                         initialFrame.pushObject(broker.getGlobal());
                         Machine machine = new Machine(initialFrame, factory, broker);
                         System.out.println("Before evaluate " + LocalTime.now());
+                        consoleListModel.start();
                         machine.evaluate();
                         System.out.println("After evaluate " + LocalTime.now());
                         //PObject o =  objectStoreSessionFuture.get().getRoot();
                         ObjectSession result = (ObjectSession)machine.getFrame().peek();
-                        outcomesListModel.insertElementAt(result.toString(), 0);
+                        //outcomesListModel.insertElementAt(result.toString(), 0);
+                        consoleListModel.log(result.toString());
                         
                         System.out.println("Before commit " + LocalTime.now());
                         objectStoreSession.commit();
+                        consoleListModel.end();
                         System.out.println("After commit " + LocalTime.now());
                     }
                     

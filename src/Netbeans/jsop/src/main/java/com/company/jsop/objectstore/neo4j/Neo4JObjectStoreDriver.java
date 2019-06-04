@@ -6,6 +6,7 @@
 package com.company.jsop.objectstore.neo4j;
 
 import com.company.jsop.objectstore.ComposedSessionStrategy;
+import com.company.jsop.objectstore.Console;
 import com.company.jsop.objectstore.ObjectSessionFactory;
 import com.company.jsop.objectstore.ObjectStoreDriver;
 import com.company.jsop.objectstore.ObjectStoreSession;
@@ -24,17 +25,20 @@ public class Neo4JObjectStoreDriver<T> implements ObjectStoreDriver {
     private Neo4JObjectStoreSessionIdentity.StatementGenerator arrayPrototypeIdentityStatementGenerator;
     private ObjectSessionFactory<T> factory;
     private com.company.jsop.objectstore.Compiler compiler;
+    private Console console;
 
     public Neo4JObjectStoreDriver(Driver driver, 
             Neo4JObjectStoreSessionIdentity.StatementGenerator rootIdentityStatementGenerator, 
             Neo4JObjectStoreSessionIdentity.StatementGenerator arrayPrototypeIdentityStatementGenerator, 
             ObjectSessionFactory<T> factory,
-            com.company.jsop.objectstore.Compiler compiler) {
+            com.company.jsop.objectstore.Compiler compiler,
+            Console console) {
         this.driver = driver;
         this.rootIdentityStatementGenerator = rootIdentityStatementGenerator;
         this.arrayPrototypeIdentityStatementGenerator = arrayPrototypeIdentityStatementGenerator;
         this.factory = factory;
         this.compiler = compiler;
+        this.console = console;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class Neo4JObjectStoreDriver<T> implements ObjectStoreDriver {
         Neo4JObjectStoreSessionIdentity arrayPrototypeIdentity = new Neo4JObjectStoreSessionIdentity(null, transaction, arrayPrototypeIdentityStatementGenerator, 0);
         SessionStrategy<T> sessionStrategy = new ComposedSessionStrategy<>();
         
-        return new Neo4JObjectStoreSession(rootIdentityStatementGenerator, arrayPrototypeIdentity, factory, compiler, sessionStrategy, session, transaction);
+        return new Neo4JObjectStoreSession(rootIdentityStatementGenerator, arrayPrototypeIdentity, factory, compiler, sessionStrategy, session, transaction, console);
     }
 
     @Override
